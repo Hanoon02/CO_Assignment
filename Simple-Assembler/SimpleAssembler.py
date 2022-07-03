@@ -245,17 +245,13 @@ def main():
             else:
                 type = "B"
         if(type == "A"):
-            BIT_INSTRUCTIONS.append(
-                ISAtypeA(instruction[0], instruction[1], instruction[2], instruction[3]))
+            BIT_INSTRUCTIONS.append(ISAtypeA(instruction[0], instruction[1], instruction[2], instruction[3]))
         elif(type == "B"):
-            BIT_INSTRUCTIONS.append(
-                ISAtypeB(instruction[0], instruction[1], instruction[2]))
+            BIT_INSTRUCTIONS.append(ISAtypeB(instruction[0], instruction[1], instruction[2]))
         elif(type == "C"):
-            BIT_INSTRUCTIONS.append(
-                ISAtypeC(instruction[0], instruction[1], instruction[2]))
+            BIT_INSTRUCTIONS.append(ISAtypeC(instruction[0], instruction[1], instruction[2]))
         elif(type == "D"):
-            BIT_INSTRUCTIONS.append(
-                ISAtypeD(instruction[0], instruction[1], instruction[2]))
+            BIT_INSTRUCTIONS.append(ISAtypeD(instruction[0], instruction[1], instruction[2]))
         elif(type == "E"):
             BIT_INSTRUCTIONS.append(ISAtypeE(instruction[0], instruction[1]))
         elif(type == "F"):
