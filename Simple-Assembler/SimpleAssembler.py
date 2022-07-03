@@ -18,7 +18,6 @@ REGISTER = {
     "FLAGS": "111"
 }
 
-#fucntion
 def getBinary(n):
     return bin(int(n)).replace("0b", "")
 
