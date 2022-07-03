@@ -176,11 +176,18 @@ def assemblyCheck():
             elif(type == "B" and len(assembly) == 3):
                 if (checkImmutable(assembly) == 0):
                     continue
+<<<<<<< HEAD
                 if(int(assembly[2][1:])):
                     if(assembly[1] not in REGISTER.keys()):
                         ERROR_LINES.append("Error: Invalid Register Name: " + "( " + assembly[2].strip("$") + ")")
                 else:
                     ERROR_LINES.append("Error: No Number after Mov: " + " ".join(assembly))
+=======
+                if(assembly[1] not in REGISTER.keys()):
+                    ERROR_LINES.append(
+                        "Error: Invalid Register Name: " + " ".join(assembly))
+                    continue
+>>>>>>> Fixed Mov ISA
                 if(flagCheck(assembly)):
                     continue
             elif(type == "C" and len(assembly) == 3):
