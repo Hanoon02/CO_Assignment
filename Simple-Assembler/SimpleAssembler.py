@@ -27,40 +27,42 @@ def getDecimal(n):
 varCount = 0
 instructionCount = 0
 
-def labelCheck(instruction):
+def labelCheck(instruction, lineCount):
     if(len(instruction) == 1):
         if(instruction[0][-1] == ":"):
-            ERROR_LINES.append("Error: Label Declared without Instruction:" + " ".join(instruction))
+            ERROR_LINES.append("Error: Label Declared without Instruction:" +"In Line Number " + str(lineCount) + ": " + " ".join(instruction))
         else:
-            ERROR_LINES.append("Error: Incomplete Instruction:" + " ".join(instruction))
+            ERROR_LINES.append("Error: Incomplete Instruction:" +"In Line Number " + str(lineCount) + ": " + " ".join(instruction))
     else:
         if(instruction[0][-1] != ":"):
-            ERROR_LINES.append("Error: Wrong Declaration of Label:" + " ".join(instruction))
+            ERROR_LINES.append("Error: Wrong Declaration of Label:" +"In Line Number " + str(lineCount) + ": " + " ".join(instruction))
         if(instruction[1] == "var"):
-            ERROR_LINES.append("Error: Variable Declared After Label:" + " ".join(instruction))
+            ERROR_LINES.append("Error: Variable Declared After Label:" +"In Line Number " + str(lineCount) + ": " + " ".join(instruction))
         if(instruction[0][:-1] in LABEL_DICT.keys()):
-            ERROR_LINES.append("Error: Label Declared Already: " + " ".join(instruction))
+            ERROR_LINES.append("Error: Label Declared Already: " +"In Line Number " + str(lineCount) + ": " + " ".join(instruction))
 
 def memoryAllocation(varCount, instructionCount):
     varStop = 0
+    lineCount = 0
     for instruction in INSTRUCTIONS:
+        lineCount += 1
         if(instruction[0] == "var"):
             if(varStop == 0):
                 if(len(instruction) == 1):
-                    ERROR_LINES.append("Error: Variable Declared without Value:" + " ".join(instruction))
+                    ERROR_LINES.append("Error: Variable Declared without Value:" +"In Line Number " + str(lineCount) + ": " + " ".join(instruction))
                 elif(instruction[1] in VARIABLES):
-                    ERROR_LINES.append("Variable Declared Already: " + " ".join(instruction))
+                    ERROR_LINES.append("Variable Declared Already: " +"In Line Number " + str(lineCount) + ": " + " ".join(instruction))
                 else:
                     varCount += 1
                     VARIABLES.append(instruction[1])
             else:
-                ERROR_LINES.append("Error: Variable Declared After Instruction:" + " ".join(instruction))
+                ERROR_LINES.append("Error: Variable Declared After Instruction:" +"In Line Number " + str(lineCount) + ": " + " ".join(instruction))
         elif(instruction[0] in OPCODE.keys()):
             varStop = 1
             instructionCount += 1
         else:
             varStop = 1
-            labelCheck(instruction)
+            labelCheck(instruction, lineCount)
             if(instruction[0][-1] == ":"):
                 LABEL_DICT[instruction[0][:-1]] = instructionCount
                 instructionCount += 1
@@ -114,23 +116,23 @@ def getType(OpCode):
     else:
         return "Invalid"
 
-def checkImmutable(assembly):
+def checkImmutable(assembly, linecounter):
     if assembly[2][:1] != "$":
-        ERROR_LINES.append("Error: Immutable Variable Not Used")
+        ERROR_LINES.append("Error: Immutable Variable Not Used" +"In Line Number " + str(linecounter))
     else:
         try:
             number = int(assembly[2].strip("$"))
             if number >= 0 and number <= 255:
                 return 1
             else:
-                ERROR_LINES.append("Error: Immutable Variable Out Of Range: " +"( " + assembly[2].strip("$") + " is out of range" + " )")
+                ERROR_LINES.append("Error: Immutable Variable Out Of Range: " +"( " + assembly[2].strip("$") + " is out of range" + " )" +"In Line Number " + str(linecounter))
         except:
-            ERROR_LINES.append("Error: Invalid Number: " + " ".join(assembly))
+            ERROR_LINES.append("Error: Invalid Number: " +"In Line Number " + str(linecounter) + ": " + " ".join(assembly))
     return 0
 
-def flagCheck(assembly):
+def flagCheck(assembly, linecounter):
     if("FLAGS" in assembly):
-        ERROR_LINES.append("Error: Invalid Use of Flag Register: "+" ".join(assembly))
+        ERROR_LINES.append("Error: Invalid Use of Flag Register: " + "In Line Number " + str(linecounter) + ": " + " ".join(assembly))
         return 1
     return 0
 
@@ -154,56 +156,57 @@ def assemblyCheck():
                     else:
                         type = "B"
                 except:
-                    ERROR_LINES.append("ERROR: Invalid Mov Instruction: "+" ".join(assembly))
+                    ERROR_LINES.append("ERROR: Invalid Mov Instruction"+"In Line Number " + str(linecounter) + ": " + " ".join(assembly))
                     continue
             if(type == "A" and len(assembly) == 4):
                 if(assembly[1] not in REGISTER.keys() or assembly[2] not in REGISTER.keys() or assembly[3] not in REGISTER.keys()):
-                    ERROR_LINES.append("Error: Invalid Register(s): " + " ".join(assembly))
+                    ERROR_LINES.append("Error: Invalid Register(s) " + "In Line Number " + str(linecounter) + ": " + " ".join(assembly))
                     continue
-                if(flagCheck(assembly)):
+                if(flagCheck(assembly, linecounter)):
                     continue
             elif(type == "B" and len(assembly) == 3):
-                if (checkImmutable(assembly) == 0):
+                if (checkImmutable(assembly, linecounter) == 0):
                     continue
                 if(assembly[1] not in REGISTER.keys()):
-                    ERROR_LINES.append("Error: Invalid Register Name: " + " ".join(assembly))
+                    ERROR_LINES.append("Error: Invalid Register Name " + "In Line Number " + str(linecounter) + ": " + " ".join(assembly))
                     continue
-                if(flagCheck(assembly)):
+                if(flagCheck(assembly, linecounter)):
                     continue
             elif(type == "C" and len(assembly) == 3):
                 if(assembly[1] not in REGISTER.keys() or assembly[2] not in REGISTER.keys()):
-                    ERROR_LINES.append("Error: Invalid Register Used: " + " ".join(assembly))
+                    ERROR_LINES.append("Error: Invalid Register Used " + "In Line Number " + str(linecounter) + ": " + " ".join(assembly))
                     continue
                 if(assembly[0] != "mov"):
-                    if(flagCheck(assembly)):
+                    if(flagCheck(assembly, linecounter)):
                         continue
                 else:
                     if(assembly[2] == "FLAGS"):
-                        ERROR_LINES.append("Error: Invalid Use of Flag Register: "+" ".join(assembly))
+                        ERROR_LINES.append("Error: Invalid Use of Flag Register " + "In Line Number " + str(linecounter) + ": " + " ".join(assembly))
                         continue
             elif(type == "D" and len(assembly) == 3):
                 if(assembly[2] in LABEL_DICT.keys()):
-                    ERROR_LINES.append("Error: Invalid use of Label as Variable:"+" ".join(assembly))
+                    ERROR_LINES.append("Error: Invalid use of Label as Variable:" + "In Line Number " + str(linecounter) + ": " + " ".join(assembly))
                 if(assembly[1] not in REGISTER.keys() or assembly[2] not in VAR_DICT.keys()):
-                    ERROR_LINES.append("Error: Invalid Register/Variable Used: " + " ".join(assembly))
+                    ERROR_LINES.append("Error: Invalid Register/Variable Used " + "In Line Number " + str(linecounter) + ": " + " ".join(assembly))
                     continue
-                if(flagCheck(assembly)):
+                if(flagCheck(assembly, linecounter)):
                     continue
             elif(type == "E" and len(assembly) == 2):
                 if(assembly[1] in VAR_DICT.keys()):
-                    ERROR_LINES.append("Error: Invalid use of Variable as Label: " + " ".join(assembly))
+                    ERROR_LINES.append("Error: Invalid use of Variable as Label: " + "In Line Number " + str(linecounter) + ": " + " ".join(assembly))
                 if(assembly[1] not in LABEL_DICT.keys()):
-                    ERROR_LINES.append("Error: Invalid Label Provided: " + " ".join(assembly))
+                    ERROR_LINES.append("Error: Invalid Label Provided " + "In Line Number " + str(linecounter) + ": " + " ".join(assembly))
                     continue
-                if(flagCheck(assembly)):
+                if(flagCheck(assembly, linecounter)):
                     continue
             elif(type == "F" and len(assembly) == 1):
                 if(linecounter != len(INSTRUCTIONS)):
-                    ERROR_LINES.append("Error: hlt Present Inbetween Instructions")
+                    ERROR_LINES.append("Error: hlt Present Inbetween Instructions" + "In Line Number " + str(linecounter))
                     hltcounter += 1
                     continue
             else:
-                ERROR_LINES.append("Error: Invalid Number of Arguments: " + " ".join(assembly))
+                ERROR_LINES.append(
+                    "Error: Invalid Number of Arguments: " + "In Line Number " + str(linecounter) + ": " + " ".join(assembly))
                 continue
     if(len(INSTRUCTIONS[len(INSTRUCTIONS)-1]) != 0):
         if(INSTRUCTIONS[len(INSTRUCTIONS)-1][0] != "hlt" and hltcounter == 0):
@@ -227,6 +230,9 @@ def main():
     assemblyCheck()
     if(len(ERROR_LINES) != 0):
         print("\n".join(ERROR_LINES))
+        with open("output.txt", "w") as output:
+            for error in ERROR_LINES:
+                output.write(error + "\n")
         return
     for instruction in INSTRUCTIONS:
         if(instruction[0] != "mov"):
@@ -253,5 +259,5 @@ def main():
     with open("output.txt", "w") as output:
         for bitInstruction in BIT_INSTRUCTIONS:
             output.write(bitInstruction + "\n")
-
+            
 main()
