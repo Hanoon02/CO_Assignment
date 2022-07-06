@@ -21,14 +21,11 @@ REGISTER = {
 def getBinary(n):
     return bin(int(n)).replace("0b", "")
 
-
 def getDecimal(n):
     return int(n, 2)
 
-
 varCount = 0
 instructionCount = 0
-
 
 def labelCheck(instruction):
     if(len(instruction) == 1):
@@ -41,7 +38,8 @@ def labelCheck(instruction):
             ERROR_LINES.append("Error: Wrong Declaration of Label:" + " ".join(instruction))
         if(instruction[1] == "var"):
             ERROR_LINES.append("Error: Variable Declared After Label:" + " ".join(instruction))
-
+        if(instruction[0][:-1] in LABEL_DICT.keys()):
+            ERROR_LINES.append("Error: Label Declared Already: " + " ".join(instruction))
 
 def memoryAllocation(varCount, instructionCount):
     varStop = 0
@@ -50,6 +48,8 @@ def memoryAllocation(varCount, instructionCount):
             if(varStop == 0):
                 if(len(instruction) == 1):
                     ERROR_LINES.append("Error: Variable Declared without Value:" + " ".join(instruction))
+                elif(instruction[1] in VARIABLES):
+                    ERROR_LINES.append("Variable Declared Already: " + " ".join(instruction))
                 else:
                     varCount += 1
                     VARIABLES.append(instruction[1])
@@ -69,10 +69,8 @@ def memoryAllocation(varCount, instructionCount):
         VAR_DICT[f"{VARIABLES[variable]}"] = instructionCount
         instructionCount += 1
 
-
 def ISAtypeA(Opcode, Reg1, Reg2, Reg3):
     return (OPCODE[Opcode])+"00"+(REGISTER[Reg1])+REGISTER[Reg2]+(REGISTER[Reg3])
-
 
 def ISAtypeB(OpCode, Register, num):
     if(OpCode == "mov"):
@@ -82,7 +80,6 @@ def ISAtypeB(OpCode, Register, num):
     bitVal = getBinary(num[1:])
     return opBits+REGISTER[Register]+("0"*(8-len(bitVal)))+bitVal
 
-
 def ISAtypeC(OpCode, Register1, Register2):
     if(OpCode == "mov"):
         opBits = OPCODE[OpCode][1]
@@ -90,20 +87,16 @@ def ISAtypeC(OpCode, Register1, Register2):
         opBits = OPCODE[OpCode]
     return opBits+"00000"+REGISTER[Register1]+REGISTER[Register2]
 
-
 def ISAtypeD(OpCode, Register1, memAddress):
     var = getBinary(VAR_DICT[memAddress])
     return OPCODE[OpCode]+REGISTER[Register1]+("0"*(8-len(var)))+var
-
 
 def ISAtypeE(OpCode, memAddress):
     varMemory = getBinary(LABEL_DICT[memAddress])
     return (OPCODE[OpCode])+"000"+("0"*(8-len(varMemory)))+getBinary(LABEL_DICT[memAddress])
 
-
 def ISAtypeF(OpCode):
     return OPCODE[OpCode] + "00000000000"
-
 
 def getType(OpCode):
     if(OpCode == "add" or OpCode == "sub" or OpCode == "mul" or OpCode == "xor" or OpCode == "or" or OpCode == "and"):
@@ -121,7 +114,6 @@ def getType(OpCode):
     else:
         return "Invalid"
 
-
 def checkImmutable(assembly):
     if assembly[2][:1] != "$":
         ERROR_LINES.append("Error: Immutable Variable Not Used")
@@ -136,13 +128,11 @@ def checkImmutable(assembly):
             ERROR_LINES.append("Error: Invalid Number: " + " ".join(assembly))
     return 0
 
-
 def flagCheck(assembly):
     if("FLAGS" in assembly):
         ERROR_LINES.append("Error: Invalid Use of Flag Register: "+" ".join(assembly))
         return 1
     return 0
-
 
 def assemblyCheck():
     linecounter = 0
@@ -192,10 +182,16 @@ def assemblyCheck():
                         ERROR_LINES.append("Error: Invalid Use of Flag Register: "+" ".join(assembly))
                         continue
             elif(type == "D" and len(assembly) == 3):
+                if(assembly[2] in LABEL_DICT.keys()):
+                    ERROR_LINES.append("Error: Invalid use of Label as Variable:"+" ".join(assembly))
                 if(assembly[1] not in REGISTER.keys() or assembly[2] not in VAR_DICT.keys()):
                     ERROR_LINES.append("Error: Invalid Register/Variable Used: " + " ".join(assembly))
                     continue
+                if(flagCheck(assembly)):
+                    continue
             elif(type == "E" and len(assembly) == 2):
+                if(assembly[1] in VAR_DICT.keys()):
+                    ERROR_LINES.append("Error: Invalid use of Variable as Label: " + " ".join(assembly))
                 if(assembly[1] not in LABEL_DICT.keys()):
                     ERROR_LINES.append("Error: Invalid Label Provided: " + " ".join(assembly))
                     continue
@@ -212,14 +208,12 @@ def assemblyCheck():
     if(INSTRUCTIONS[len(INSTRUCTIONS)-1][0] != "hlt" and hltcounter == 0):
         ERROR_LINES.append("Error: hlt Instruction Missing")
 
-
 def filereading():
     for instruction in sys.stdin:
         if(len(instruction.split()) == 0):
             continue
         else:
             INSTRUCTIONS.append(instruction.split())
-
 
 def main():
     filereading()
@@ -258,6 +252,5 @@ def main():
     with open("output.txt", "w") as output:
         for bitInstruction in BIT_INSTRUCTIONS:
             output.write(bitInstruction + "\n")
-
 
 main()
