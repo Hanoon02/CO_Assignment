@@ -222,7 +222,8 @@ def filereading():
 def main():
     filereading()
     if(len(INSTRUCTIONS) > 256):
-        ERROR_LINES.append("ERROR: Maximum Instructions Exceeded")
+        print("ERROR: Maximum Instructions Exceeded")
+        return
     if len(INSTRUCTIONS) == 0:
         print("Error: No Instructions")
         return
