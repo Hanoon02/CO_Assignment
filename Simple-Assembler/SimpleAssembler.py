@@ -205,8 +205,9 @@ def assemblyCheck():
             else:
                 ERROR_LINES.append("Error: Invalid Number of Arguments: " + " ".join(assembly))
                 continue
-    if(INSTRUCTIONS[len(INSTRUCTIONS)-1][0] != "hlt" and hltcounter == 0):
-        ERROR_LINES.append("Error: hlt Instruction Missing")
+    if(len(INSTRUCTIONS[len(INSTRUCTIONS)-1]) != 0):
+        if(INSTRUCTIONS[len(INSTRUCTIONS)-1][0] != "hlt" and hltcounter == 0):
+            ERROR_LINES.append("Error: hlt Instruction Missing")
 
 def filereading():
     for instruction in sys.stdin:
