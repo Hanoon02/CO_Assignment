@@ -221,9 +221,6 @@ def filereading():
 
 def main():
     filereading()
-    if(len(INSTRUCTIONS) > 256):
-        print("ERROR: Maximum Instructions Exceeded")
-        return
     if len(INSTRUCTIONS) == 0:
         print("Error: No Instructions")
         return
@@ -255,6 +252,9 @@ def main():
             BIT_INSTRUCTIONS.append(ISAtypeE(instruction[0], instruction[1]))
         elif(type == "F"):
             BIT_INSTRUCTIONS.append(ISAtypeF(instruction[0]))
+    if(len(BIT_INSTRUCTIONS) > 256):
+        print("ERROR: Maximum Instructions Exceeded")
+        return
     for bitInstruction in BIT_INSTRUCTIONS:
         print(bitInstruction)
     with open("output.txt", "w") as output:
