@@ -50,13 +50,23 @@ class RegisterFile:
     allVariables={}
     def dump(self):
         for register in self.allRegisterValues:
-            regBits = getBinary(self.allRegisterValues[register])
-            emptyBits = "0"*(16-len(regBits))
-            #print(self.allRegisterValues[register], end=" ")
-            if register!="111":
-                print(emptyBits+regBits, end=" ")
+            if(isinstance(self.allRegisterValues[register], int)):
+                regBits = getBinary(self.allRegisterValues[register])
+                emptyBits = "0"*(16-len(regBits))
+                #print(self.allRegisterValues[register], end=" ")
+                if register!="111":
+                    print(emptyBits+regBits, end=" ")
+                else:
+                    print(emptyBits+regBits)
             else:
-                print(emptyBits+regBits)
+                regBits = getIEEEFloat(self.allRegisterValues[register])
+                emptyBits = "0"*(16-len(regBits))
+                #print(self.allRegisterValues[register], end=" ")
+                if register!="111":
+                    print(emptyBits+regBits, end=" ")
+                else:
+                    print(emptyBits+regBits)
+
     def getRegister(self, register, floatCheck):
         if(floatCheck==1):
             if(isinstance(self.allRegisterValues[register], int)):
@@ -120,7 +130,7 @@ class ExecutionEngine:
                 RegisterFile().updateRegister(newValue, instruction[13:16])
             else:
                 RegisterFile().updateRegister(8, "111")
-                RegisterFile().updateRegister(newValue%(2**16), instruction[13:16])
+                RegisterFile().updateRegister(255, instruction[13:16])
         elif(instruction[0:5] == "10001"):  # for subtraction
             newValue = RegisterFile().getRegister(instruction[7:10],0) - RegisterFile().getRegister(instruction[10:13],0)
             if newValue>=0:
@@ -131,7 +141,7 @@ class ExecutionEngine:
                 RegisterFile().updateRegister(0, instruction[13:16])
         elif(instruction[0:5] == "00001"):  # for subtraction in fraction
             newValue = RegisterFile().getRegister(instruction[7:10],1) - RegisterFile().getRegister(instruction[10:13],1)
-            if newValue>=0:
+            if newValue>1:
                 RegisterFile().updateRegister(newValue, instruction[13:16])
             else:
                 RegisterFile().updateRegister(8, "111")
