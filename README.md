@@ -1,4 +1,4 @@
-#CO CSE112 Assignment
+# CO CSE112 Assignment
 Starter repository for Computer Organization assignment at IIITD
 
 Go to the automatedTesting directory and execute the run file with appropiate options passed as arguments.
